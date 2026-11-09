@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card narrow">
+  <h2>Connect your Upstox account</h2>
+  {% if error %}<p class="err">{{ error }}</p>{% endif %}
+  {% if key_error %}<p class="err">{{ key_error }}</p>{% endif %}
+  <ul class="checks">
+    <li class="{{ 'ok' if has_key else 'bad' }}">API key found in keys.txt</li>
+    <li class="{{ 'ok' if has_secret else 'bad' }}">API secret found in keys.txt</li>
+  </ul>
+  <p class="muted">Redirect URI (must match exactly in your Upstox app settings):<br><code>{{ redirect_uri }}</code></p>
+  <a class="btn" href="{{ url_for('login') }}">Login with Upstox</a>
+</section>
+{% endblock %}

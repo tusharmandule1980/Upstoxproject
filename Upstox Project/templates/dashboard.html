@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% macro money(v) %}{% if v is number %}₹{{ '{:,.2f}'.format(v) }}{% else %}{{ v if v is not none else '-' }}{% endif %}{% endmacro %}
+{% macro err(e) %}<p class="err">{{ e }}</p>{% endmacro %}
+{% block content %}
+{% set p, pe = s.profile %}{% set f, fe = s.funds %}{% set pos, pose = s.positions %}{% set h, he = s.holdings %}
+
+<section class="card"><h2>Profile</h2>
+{% if pe %}{{ err(pe) }}{% elif p %}
+  <dl>
+    <dt>Name</dt><dd>{{ p.user_name }}</dd>
+    <dt>User ID</dt><dd>{{ p.user_id }}</dd>
+    <dt>Email</dt><dd>{{ p.email }}</dd>
+    <dt>Broker</dt><dd>{{ p.broker }}</dd>
+    <dt>Account type</dt><dd>{{ p.user_type }}</dd>
+    <dt>Exchanges</dt><dd>{{ (p.exchanges or []) | join(', ') }}</dd>
+    <dt>Products</dt><dd>{{ (p.products or []) | join(', ') }}</dd>
+    <dt>Order types</dt><dd>{{ (p.order_types or []) | join(', ') }}</dd>
+    <dt>Active</dt><dd>{{ 'Yes' if p.is_active else 'No' }}</dd>
+  </dl>
+{% endif %}</section>
+
+<section class="card"><h2>Funds &amp; margin</h2>
+{% if fe %}{{ err(fe) }}<p class="muted">Upstox's funds service is unavailable roughly 12:00 AM–5:30 AM IST.</p>
+{% elif f %}
+  <div class="grid">
+  {% for seg, label in [('equity','Equity'),('commodity','Commodity')] %}{% if f.get(seg) %}
+    <div><h3>{{ label }}</h3><dl>
+      <dt>Available margin</dt><dd>{{ money(f[seg].available_margin) }}</dd>
+      <dt>Used margin</dt><dd>{{ money(f[seg].used_margin) }}</dd>
+      <dt>Payin amount</dt><dd>{{ money(f[seg].payin_amount) }}</dd>
+      <dt>Span margin</dt><dd>{{ money(f[seg].span_margin) }}</dd>
+      <dt>Exposure margin</dt><dd>{{ money(f[seg].exposure_margin) }}</dd>
+    </dl></div>
+  {% endif %}{% endfor %}
+  </div>
+{% endif %}</section>
+
+<section class="card"><h2>Open positions</h2>
+{% if pose %}{{ err(pose) }}{% elif pos %}
+  <div class="scroll"><table><tr><th>Instrument</th><th>Qty</th><th>Avg</th><th>LTP</th><th>P&amp;L</th></tr>
+  {% for x in pos %}<tr><td>{{ x.trading_symbol }}</td><td>{{ x.quantity }}</td><td>{{ money(x.average_price) }}</td><td>{{ money(x.last_price) }}</td>
+  <td class="{{ 'pos' if (x.pnl or 0) >= 0 else 'neg' }}">{{ money(x.pnl) }}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">No positions.</p>{% endif %}</section>
+
+<section class="card"><h2>Holdings</h2>
+{% if he %}{{ err(he) }}{% elif h %}
+  <div class="scroll"><table><tr><th>Instrument</th><th>Qty</th><th>Avg</th><th>LTP</th><th>P&amp;L</th></tr>
+  {% for x in h %}<tr><td>{{ x.trading_symbol }}</td><td>{{ x.quantity }}</td><td>{{ money(x.average_price) }}</td><td>{{ money(x.last_price) }}</td>
+  <td class="{{ 'pos' if (x.pnl or 0) >= 0 else 'neg' }}">{{ money(x.pnl) }}</td></tr>{% endfor %}</table></div>
+{% else %}<p class="muted">No holdings.</p>{% endif %}</section>
+{% endblock %}

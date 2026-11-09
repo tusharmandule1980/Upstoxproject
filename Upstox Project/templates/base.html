@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Upstox Trading{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header><h1>Upstox Trading</h1>
+    <nav><a href="{{ url_for('bt.page') }}">Backtest</a>{% if request.endpoint == 'dashboard' %} <a href="{{ url_for('dashboard') }}">Refresh</a> <a href="{{ url_for('logout') }}">Logout</a>{% endif %}</nav>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>

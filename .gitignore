@@ -1,0 +1,7 @@
+Keys.txt
+keys.txt
+.claude/
+token.json
+.env
+__pycache__/
+.venv/
