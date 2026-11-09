@@ -591,6 +591,15 @@ Rally, 7 Nov (log items 41–44 in `Rally\Rally_Session_Notes.md`):
 - **Upstox app: new Live button on /backtest → http://127.0.0.1:5000/live** = the Rally S1/S2/S3 paper-trading page (read only, rules shown). Added `rally_live_web.py` + one line in `app.py` + the button in `templates/backtest.html`; the EMA 20 strategy is unchanged; 33 tests pass. One link only (the 8765 page is just a spare).
 - **Each morning:** run `run.bat` → Login before 09:15 and keep it open; watch http://127.0.0.1:5000/live.
 
+Rally and data, 8–9 Nov (log items 45–51 in `Rally\Rally_Session_Notes.md`):
+
+- **Strategy 4 study (data only, no P&L): EMA 50/200 cross on 5-min.** The user moved it to the **Nifty 50 index** (1-min data now in `Upstox Project\data\index`, `download_index.py`) with a sweep rule of 2 consecutive 5-min candles whose open and close are beyond EMA 50. 235 crosses, same-day max median 55 pts, 51% get a sweep (median 44 with a sweep vs 70 without). Workbook `Rally\Rally_EMA50_200_Index_Study.xlsx`. The user is reviewing it and will add a minimum-points condition between EMA 50 and 200.
+- A chart's 200 EMA differed on 12 Oct because the chart loaded too little 5-min history (it needs about 12 days to settle). A live program needs 15+ days of history to match the backtest (tested: 224 of 224 crosses).
+- **Upstox redirect URL = http://127.0.0.1:5000** (as in keys.txt; the /live page does not handle login).
+- **Data topped up to 6 Nov 2026** (user's choice 1-A, 2-B, 3-B). Expired 3 Nov options downloaded. New `download_live.py` fetches contracts not yet expired (Nov future, 9 and 17 Nov options), listed in `data\partial_files.csv`; `data_download.py` re-downloads them in full after expiry. `backtest.py` now reads the live lot size (65; the fallback was 75). Backtest 5-min ATM: 805 trades, Rs 1,67,351 (all old trades unchanged). Rally S1–S3: 219 trades, Rs 2,33,465. **`update_data.bat` (after 15:35) adds the day to both backtests.** Tests: 33 passed.
+- **First paper-trading day, 9 Nov (expiry day, S3 only):** the trader stopped at 09:15 with "Access is denied state.tmp -> state.json" (the /live page was reading the file). Fixed: the write retries and never stops the trader. Restarted at 09:19; nothing missed.
+- **VPS:** paper trading and backtests stay on the laptop. A VPS is only for future live automated trading: Windows Server, 2 vCPU, 4–8 GB RAM, 40–60 GB SSD, Mumbai region, dedicated static IPv4 (Upstox accepts API orders only from a registered static IP). Live trading first needs an order mode and safety checks, and the user will confirm SEBI/Upstox algo approval.
+
 ## Troubleshooting
 
 Most problems so far came from a closed black window, an expired login, or running a command in the wrong folder.
@@ -622,6 +631,6 @@ See "Discussion log" and "New exit rules" in the doc.
 Project folder: ...\Downloads\Upstox_Project\Upstox Project
 
 Paper trading plan: ...
-Separate Rally project: read ...\Downloads\Rally\Rally_Session_Notes.md
+Separate Rally project: read ...\Downloads\Rally\Rally_Session_Notes.md (paper trading S1-S3 since 9 Nov 2026 on the laptop, http://127.0.0.1:5000/live; strategy 4 EMA 50/200 index study under my review)
 What I want to do next: ...
 ```
