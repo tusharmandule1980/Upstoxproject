@@ -2,6 +2,7 @@
 import argparse
 import json
 from functools import lru_cache
+from pathlib import Path
 
 import pandas as pd
 from flask import Blueprint, Response, abort, jsonify, render_template
@@ -42,9 +43,19 @@ def stop_rs(args, side):
     return args.get("call_max_loss", args["max_loss"]) if side == "CALL" else args["max_loss"]
 
 
+RALLY_WEB = Path(r"C:\Users\tusha\Downloads\Rally\live\backtest_web.json")   # Rally\export_backtest_web.py
+
+
 @bp.route("/backtest")
 def page():
-    return render_template("backtest.html")
+    return render_template("backtest.html")                # Rally S1, S2, S3 (chosen 10 Nov 2026)
+
+
+@bp.route("/api/rally/backtest")
+def rally_backtest():
+    if not RALLY_WEB.exists():
+        return jsonify(error="Run Rally\\export_backtest_web.py first."), 404
+    return Response(RALLY_WEB.read_bytes(), mimetype="application/json")
 
 
 @bp.route("/api/bt/meta")

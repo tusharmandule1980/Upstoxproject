@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Backtest &amp; trade audit</title>
+  <title>Rally Backtest</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='backtest.css') }}">
 </head>
 <body>
 <header class="top">
   <div class="brand">
     <div class="logo"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div>
-    <div><h1>Intraday Strategy &middot; EMA 20 + DI / ADX / RSI / MACD</h1>
-    <p>NIFTY options &middot; backtest &amp; trade audit &middot; gross P&amp;L (taxes and charges excluded)</p></div>
+    <div><h1>Rally strategies &middot; S1 Opening Drive &middot; S2 Against-gap PUT &middot; S3 Expiry Supertrend PUT</h1>
+    <p>NIFTY options backtest &middot; 1 lot (65 qty) &middot; net after 1 pt slippage each side + Rs 60 charges &middot; same engine as live paper trading</p></div>
   </div>
   <div class="top-r">
     <span class="chip" id="range"></span>
-    <button id="reload" title="Reload results (to recompute, run backtest.bat)">Reload</button>
+    <button id="reload" title="Reload results (to recompute, run update_data.bat)">Reload</button>
     <button id="theme">Dark</button>
     <a class="btn" href="/live" title="Rally strategies S1, S2, S3 - live paper trading (no real orders)">Live</a>
     <a class="btn" href="/">Account</a>
@@ -26,36 +26,31 @@
 
 <main id="app" hidden>
   <section class="panel filters">
-    <div class="f"><label>Timeframe</label><div class="seg" id="tfSeg"></div></div>
-    <div class="f"><label>Strategy</label><select id="fVariant"></select></div>
-    <div class="f"><label>Direction</label><select id="fDir"><option value="">All</option><option value="CALL">Calls</option><option value="PUT">Puts</option></select></div>
-    <div class="f"><label>Entry from</label><input type="time" id="fFrom" value="09:25"></div>
-    <div class="f"><label>Cutoff</label><input type="time" id="fTo" value="14:30"></div>
+    <div class="f"><label>Strategy</label><select id="fStrat"><option value="">All three</option><option value="1">S1 Opening Drive</option><option value="2">S2 Against-gap PUT</option><option value="3">S3 Expiry Supertrend PUT</option></select></div>
     <div class="f"><label>Outcome</label><select id="fOutcome"><option value="">All</option><option value="win">Wins</option><option value="loss">Losses</option></select></div>
     <div class="f"><label>Exit reason</label><select id="fReason"></select></div>
-    <div class="f"><label>Expiry</label><select id="fDte"><option value="">Any</option><option value="0">Expiry day</option><option value="1">1 day left</option><option value="2">2 days left</option><option value="3">3+ days left</option></select></div>
     <div class="f"><label>From</label><input type="date" id="fD1"></div>
     <div class="f"><label>To</label><input type="date" id="fD2"></div>
     <div class="f"><label>&nbsp;</label><button id="reset">Reset</button></div>
   </section>
 
   <section class="kpis" id="kpis"></section>
-  <section class="variants" id="variants"></section>
+  <section class="variants" id="cards"></section>
   <section class="panel" id="breakdown"></section>
 
   <section class="split">
-    <aside class="panel list">
-      <div class="ph"><span id="listTitle">Trades</span><span class="hint"><kbd>&uarr;</kbd><kbd>&darr;</kbd> navigate</span></div>
-      <div id="list" class="scroll"></div>
+    <aside class="panel cal">
+      <div class="ph"><button id="mPrev" aria-label="Previous month">&lsaquo;</button><span id="mTitle"></span><button id="mNext" aria-label="Next month">&rsaquo;</button></div>
+      <div id="calendar"></div>
+      <div class="hint calhint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> previous / next trade &middot; <span class="dot e"></span> weekly expiry day</div>
+      <div id="dayPanel"></div>
     </aside>
     <div class="right">
       <section class="panel" id="detail"></section>
-      <section class="panel"><div class="ph"><span id="futTitle">NIFTY futures</span>
-        <span class="legend"><i style="background:var(--ema)"></i>EMA 20 <i style="background:var(--mean)"></i>Average since 09:15 <i style="background:var(--pos)"></i>Entry <i style="background:var(--neg)"></i>Exit</span></div>
+      <section class="panel" id="rules"></section>
+      <section class="panel"><div class="ph"><span id="futTitle">NIFTY futures</span><span class="legend" id="legend"></span></div>
         <div id="chartFut"></div></section>
-      <section class="panel"><div class="ph"><span id="optTitle">Option premium</span>
-        <span class="legend"><i style="background:var(--pos)"></i>Entry <i style="background:var(--neg)"></i>Exit / stop</span></div>
-        <div id="chartOpt"></div></section>
+      <section class="panel" id="events"></section>
     </div>
   </section>
 </main>

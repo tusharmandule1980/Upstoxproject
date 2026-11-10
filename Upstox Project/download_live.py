@@ -104,6 +104,27 @@ def main():
           f"{len(picks)} contracts")
 
     partial = load_partial()
+    # contracts that expired after their partial download: they leave the live list at once, but Upstox can take
+    # days to list the expiry - the expired-candle service already answers by key, so fetch them in full now
+    problems, finished = [], 0
+    for name, r in sorted(partial.items()):
+        exp = date.fromisoformat(r["expiry"])
+        if exp >= today:
+            continue
+        tok = name.split("_")[2]
+        key = f"NSE_FO|{tok}|{exp:%d-%m-%Y}"
+        rows = dd.fetch_candles(api, key, "1minute", exp - timedelta(days=LOOKBACK[r["kind"]]), exp, 28, problems)
+        if not rows:
+            continue                                       # leave it partial; data_download.py tries later
+        with (DATA / r["kind"] / name).open("w", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(dd.HEADER)
+            w.writerows(rows)
+        drop_resampled(r["kind"], name)
+        del partial[name]
+        finished += 1
+    if finished or problems:
+        print(f"Expired since the last run: {finished} contracts downloaded in full ({len(problems)} problems)")
     lots = {}
     done = skipped = 0
     for kind, c in picks:
